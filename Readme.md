@@ -46,7 +46,7 @@ An error:
 Returns nil if there is no error.
 Returns the error encountered during the upload process otherwise.
 
-##Configuration
+## Configuration
 Make sure to set up the GOOGLE_STORAGE_BUCKET_NAME environment variable in your environment. This should point to the path of the Google user account key you've previously created:
 
 ```yaml
@@ -55,5 +55,5 @@ export GOOGLE_STORAGE_BUCKET_NAME=path_to_your_google_account_key.json
 
 Replace path_to_your_google_account_key.json with the actual path to your Google user account key file.
 
-##Contributing
+## Contributing
 Feel free to open issues or PRs if you find any problems or have suggestions!
