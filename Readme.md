@@ -21,12 +21,14 @@ import "github.com/awmpietro/gcpfileupload"
 Create an instance of FileUploader:
 
 ```go
-fileUpload := gcpfileupload.FileUploader{
-    Request:    r,
-    FormFile:   "file",
-    FileName:   "my-new-name",
-    BucketName: "your-google-cloud-storage-bucket-name",
-}
+/**
+/* The params for NewFileUploader are:
+/* r *http.Request - pointer to the current http.Request
+/* formFile string - name of field in form that holds the file
+/* fileName string - if you want to change the name of original file. default is original name.
+/* bucketName string - the name of the bucket where file is going to be store in Google Cloud Storage
+*/
+fileUpload := gcpfileupload.NewFileUploader(r, "file", "my-new-name", "my-bucket")
 ```
 
 Call the Upload function:

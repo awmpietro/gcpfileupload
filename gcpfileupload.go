@@ -17,6 +17,15 @@ type FileUploader struct {
 	BucketName string
 }
 
+func NewFileUploader(r *http.Request, formFile string, fileName string, bucketName string) *FileUploader {
+	return &FileUploader{
+		Request:    r,
+		FormFile:   formFile,
+		FileName:   fileName,
+		BucketName: bucketName,
+	}
+}
+
 // Upload a file to a bucket in Google Cloud Storage
 // Make sure you have defined the env var GOOGLE_STORAGE_BUCKET_NAME in your env file
 // The env should point to the path of your google user account keys
