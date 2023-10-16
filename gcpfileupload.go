@@ -32,6 +32,9 @@ func NewFileUploader(r *http.Request, formFile string, fileName string, bucketNa
 func (fu *FileUploader) Upload() (bool, error) {
 	file, header, err := fu.Request.FormFile(fu.FormFile)
 	if err != nil {
+		if err == http.ErrMissingFile {
+			return false, nil
+		}
 		return false, err
 	}
 	defer file.Close()
