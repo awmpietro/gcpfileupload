@@ -29,47 +29,45 @@ func NewFileUploader(r *http.Request, formFile string, fileName string, bucketNa
 // Upload a file to a bucket in Google Cloud Storage
 // Make sure you have defined the env var GOOGLE_STORAGE_BUCKET_NAME in your env file
 // The env should point to the path of your google user account keys
-func (fu *FileUploader) Upload(errCh chan error) {
-	go func(errCh chan<- error) {
-		file, header, err := fu.Request.FormFile(fu.FormFile)
+func (fu *FileUploader) Upload() (bool, error) {
+	file, header, err := fu.Request.FormFile(fu.FormFile)
+	if err != nil {
+		if err == http.ErrMissingFile {
+			return false, nil
+		}
+		return false, err
+	}
+	defer file.Close()
+	if file != nil {
+
+		if fu.FileName == "" {
+			fu.FileName = header.Filename
+		} else {
+			ext := filepath.Ext(header.Filename)
+			fu.FileName = fu.FileName + ext
+		}
+
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+		defer cancel()
+
+		client, err := storage.NewClient(ctx)
 		if err != nil {
-			errCh <- err
-			return
+
+			return false, err
 		}
-		defer file.Close()
-		if file != nil {
+		bucket := client.Bucket(fu.BucketName)
+		obj := bucket.Object(fu.FileName)
+		wc := obj.NewWriter(ctx)
+		if _, err := io.Copy(wc, file); err != nil {
 
-			if fu.FileName == "" {
-				fu.FileName = header.Filename
-			} else {
-				ext := filepath.Ext(header.Filename)
-				fu.FileName = fu.FileName + ext
-			}
-
-			ctx := context.Background()
-			ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-			defer cancel()
-
-			client, err := storage.NewClient(ctx)
-			if err != nil {
-
-				errCh <- err
-				return
-			}
-			bucket := client.Bucket(fu.BucketName)
-			obj := bucket.Object(fu.FileName)
-			wc := obj.NewWriter(ctx)
-			if _, err := io.Copy(wc, file); err != nil {
-
-				errCh <- err
-				return
-			}
-			if err := wc.Close(); err != nil {
-				errCh <- err
-				return
-			}
-			close(errCh)
+			return false, err
 		}
-	}(errCh)
+		if err := wc.Close(); err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+	return false, nil
 
 }
